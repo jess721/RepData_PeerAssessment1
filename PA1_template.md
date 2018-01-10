@@ -7,8 +7,16 @@ output:
 
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 library(dplyr, warn.conflicts = FALSE)
+```
+
+```
+## Warning: package 'dplyr' was built under R version 3.4.2
+```
+
+```r
 library(ggplot2)
 stepData <-data <- read.csv("activity.csv")
 ##daily totals
@@ -24,24 +32,29 @@ rangeAvg <- stepData %>%
 
 ## What is mean total number of steps taken per day?
 Here is a histogram of the daily total steps:
-```{r histogram}
+
+```r
 histDaily <- (ggplot(dailySteps, aes(x=date, weight=stepTotal))
     + geom_histogram(binwidth =1)
     + labs(title ="Total Steps per Day", x = "Date", y = "Steps"))
 print(histDaily)
 ```
 
-```{r}
+![](PA1_template_files/figure-html/histogram-1.png)<!-- -->
+
+
+```r
 options(scipen=999)
 dailyMean <- mean(dailySteps$stepTotal, na.rm=TRUE)
 dailyMedian <- median(dailySteps$stepTotal, na.rm=TRUE)
 ```
 
-The mean total number number of steps per day is `r dailyMean`.
-The median totoal number of steps per day is `r dailyMedian`.
+The mean total number number of steps per day is 10766.1886792.
+The median totoal number of steps per day is 10765.
 
 ## What is the average daily activity pattern?
-```{r}
+
+```r
 lineInterval <- (ggplot(rangeAvg,aes(x=interval, y=stepAvg))
                  + geom_line()
                  + labs(title ="Average Steps per Interval", 
@@ -49,20 +62,25 @@ lineInterval <- (ggplot(rangeAvg,aes(x=interval, y=stepAvg))
 print(lineInterval)
 ```
 
-```{r}
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+
+```r
 maxInterval <- rangeAvg[which.max(rangeAvg$stepAvg),]$interval
 ```
 
-On average, the most steps were taken in the `r maxInterval` five minute time interval.
+On average, the most steps were taken in the 835 five minute time interval.
 
 ## Imputing missing values
-```{r naCount}
+
+```r
 totalNA <- sum(is.na(stepData$steps))
 ```
 
-There are a total of `r totalNA` missing values in the dataset. 
+There are a total of 2304 missing values in the dataset. 
 
-```{r imputeVals}
+
+```r
 ##set all NA values to the average for that interval
 stepDataNoNA <-stepData
 for(i in seq_along(stepData$steps)){
@@ -74,7 +92,8 @@ for(i in seq_along(stepData$steps)){
 }
 ```
 
-```{r}
+
+```r
 ##daily totals after imputing values
 dailyStepsNoNA <- stepDataNoNA %>% 
     group_by(date) %>% 
@@ -83,26 +102,31 @@ dailyStepsNoNA$date <- as.Date(dailyStepsNoNA$date, "%Y-%m-%d")
 ```
 
 Here is a histogram of the daily total steps after imputing missing values:
-```{r histogramNoNA}
+
+```r
 histDailyNoNA <- (ggplot(dailyStepsNoNA, aes(x=date, weight=stepTotal))
     + geom_histogram(binwidth =1)
     + labs(title ="Total Steps per Day", x = "Date", y = "Steps"))
 print(histDailyNoNA)
 ```
 
-```{r}
+![](PA1_template_files/figure-html/histogramNoNA-1.png)<!-- -->
+
+
+```r
 options(scipen=999)
 dailyMeanNoNA <- mean(dailyStepsNoNA$stepTotal, na.rm=TRUE)
 dailyMedianNoNA <- median(dailyStepsNoNA$stepTotal, na.rm=TRUE)
 ```
 
-The mean total number number of steps per day after imputing missing values is `r dailyMeanNoNA`.
-The median totoal number of steps per day after imputing missing values is `r dailyMedianNoNA`.
+The mean total number number of steps per day after imputing missing values is 10766.1886792.
+The median totoal number of steps per day after imputing missing values is 10766.1886792.
 
 Imputing missing values did not change the mean, but did slightly increase the median. However, the overall total number of steps over the 61 days did increase, as seen in the histogram.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r checkWeekday,results="hide"}
+
+```r
 ##foctor weekends
 weekdayYN <- vector(length=length(stepDataNoNA$steps))
 for(i in seq_along(stepDataNoNA$steps)){
@@ -114,11 +138,13 @@ for(i in seq_along(stepDataNoNA$steps)){
             "weekday"
         }
 }
+##factor(weekdayYN,levels = c(0,1),labels = c("weekend","weekday"))
 factor(weekdayYN,levels = c("weekend","weekday"))
 stepDataNoNA <- cbind(stepDataNoNA,weekdayYN)
 ```
 
-```{r plotWeekdays/Ends}
+
+```r
 ##summarize by weekday(end) and interval
 rangeAvgWeekdayYN <- stepDataNoNA %>% 
     group_by(weekdayYN, interval) %>% 
@@ -132,3 +158,5 @@ lineInterval <- (ggplot(rangeAvgWeekdayYN,aes(x=interval, y=stepAvg))
                         x = "Interval", y = "Average Steps"))
 print(lineInterval)
 ```
+
+![](PA1_template_files/figure-html/plotWeekdays/Ends-1.png)<!-- -->
